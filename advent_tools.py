@@ -1,5 +1,6 @@
 import os
 import sys
+from time import perf_counter
 import torch
 
 
@@ -58,3 +59,40 @@ class PuzzleSetup:
                     self.__setattr__(kwarg[2:], True)
                 else:
                     raise IOError(f"Unrecognised kwarg '{kwarg}'.")
+
+
+class Timer:
+    """
+    A simple class for timing code execution.
+    """
+
+    def __init__(self, setup, codeblock):
+        """
+        :arg setup: the :class:`PuzzleSetup` instance.
+        :arg codeblock: a name for the code block being timed.
+        """
+        assert isinstance(setup, PuzzleSetup)
+        self.setup = setup
+        self.codeblock = codeblock
+        self.timestamp = None
+
+    def __enter__(self):
+        """
+        Start the timer.
+        """
+        print(f"{self.codeblock}")
+        print(len(self.codeblock) * "=")
+        self.timestamp = perf_counter()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        """
+        Stop the timer.
+        """
+        if not self.setup.verbose:
+            return
+        time = perf_counter() - self.timestamp
+        dev = "GPU" if self.setup.gpu else "CPU"
+        print(f"Time taken for {self.codeblock} on {dev}: {time:.4e} seconds")
+        if self.codeblock == "Part 1":
+            print("\n")
