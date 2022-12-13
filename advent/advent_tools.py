@@ -1,7 +1,12 @@
 import os
 import sys
 from time import perf_counter
-import torch
+try:
+    import torch
+    have_torch = True
+except ImportError:
+    print("PyTorch is not installed")
+    have_torch = False
 
 
 __all__ = ["PuzzleSetup", "Timer"]
@@ -22,8 +27,8 @@ class PuzzleSetup:
         self._set_kwargs()
 
         # Set CUDA device
-        self.device = torch.device("cpu")
-        if self.gpu:
+        self.device = "cpu" if not have_torch else  torch.device("cpu")
+        if have_torch and self.gpu:
             assert torch.cuda.is_available(), "CUDA is not available."
             device = torch.device("cuda:0")
             if self.verbose:
